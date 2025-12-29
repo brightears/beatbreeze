@@ -34,12 +34,13 @@ Cloud Code is a web-first B2B music streaming platform designed to replace BeatB
 - **Dashboard**: https://dashboard.render.com/d/dpg-d599alggjchc73aj87bg-a
 
 ### Web Service
-- **ID**: `srv-d599fth5pdvs73a8qspg`
+- **ID**: `srv-d59a1keuk2gs73e36a9g`
 - **Name**: cloudcode
-- **URL**: https://cloudcode-0dpi.onrender.com
+- **URL**: https://cloudcode-4g2d.onrender.com
 - **Region**: Singapore
 - **Plan**: starter
-- **Dashboard**: https://dashboard.render.com/web/srv-d599fth5pdvs73a8qspg
+- **Runtime**: Docker (Node 22 LTS)
+- **Dashboard**: https://dashboard.render.com/web/srv-d59a1keuk2gs73e36a9g
 
 ### Render API
 - **Base URL**: `https://api.render.com/v1`

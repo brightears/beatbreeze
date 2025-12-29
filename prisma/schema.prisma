@@ -1,0 +1,327 @@
+// Cloud Code - B2B Music Platform Schema
+// Multi-tenant architecture with organization-based isolation
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ORGANIZATION & AUTH
+// ============================================================================
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  logoUrl   String?  @map("logo_url")
+  timezone  String   @default("Asia/Bangkok")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  users     User[]
+  venues    Venue[]
+  playlists Playlist[]
+  tracks    Track[]
+  messages  Message[]
+
+  @@map("organizations")
+}
+
+model User {
+  id             String   @id @default(uuid())
+  email          String   @unique
+  name           String?
+  avatarUrl      String?  @map("avatar_url")
+  role           UserRole @default(MEMBER)
+  organizationId String   @map("organization_id")
+  supabaseUserId String?  @unique @map("supabase_user_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("users")
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+// ============================================================================
+// VENUES & ZONES
+// ============================================================================
+
+model Venue {
+  id             String   @id @default(uuid())
+  name           String
+  address        String?
+  latitude       Float?
+  longitude      Float?
+  timezone       String   @default("Asia/Bangkok")
+  organizationId String   @map("organization_id")
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  zones          Zone[]
+  weatherRules   WeatherRule[]
+
+  @@index([organizationId])
+  @@map("venues")
+}
+
+model Zone {
+  id            String     @id @default(uuid())
+  name          String
+  description   String?
+  venueId       String     @map("venue_id")
+  defaultVolume Int        @default(70) @map("default_volume")
+  isActive      Boolean    @default(true) @map("is_active")
+  status        ZoneStatus @default(OFFLINE)
+  lastSeenAt    DateTime?  @map("last_seen_at")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  venue     Venue           @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  schedules ScheduleBlock[]
+  nowPlaying NowPlaying?
+
+  @@index([venueId])
+  @@map("zones")
+}
+
+enum ZoneStatus {
+  ONLINE
+  OFFLINE
+  PLAYING
+  PAUSED
+  ERROR
+}
+
+// ============================================================================
+// CONTENT LIBRARY
+// ============================================================================
+
+model Track {
+  id             String   @id @default(uuid())
+  title          String
+  artist         String?
+  album          String?
+  duration       Int      // Duration in seconds
+  bpm            Int?     // Beats per minute
+  genre          String?
+  mood           String[] // Array of mood tags
+  energyLevel    Int?     @map("energy_level") // 1-10 scale
+  tags           String[] // Freeform search tags
+  fileUrl        String   @map("file_url")
+  fileSize       Int      @map("file_size") // Bytes
+  waveformUrl    String?  @map("waveform_url")
+  coverUrl       String?  @map("cover_url")
+  isExplicit     Boolean  @default(false) @map("is_explicit")
+  organizationId String?  @map("organization_id") // Null = system library
+  uploadedById   String?  @map("uploaded_by_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  organization   Organization?   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  playlistTracks PlaylistTrack[]
+
+  @@index([organizationId])
+  @@index([genre])
+  @@index([mood])
+  @@map("tracks")
+}
+
+model Playlist {
+  id             String   @id @default(uuid())
+  name           String
+  description    String?
+  coverUrl       String?  @map("cover_url")
+  isPublic       Boolean  @default(false) @map("is_public")
+  organizationId String   @map("organization_id")
+  createdById    String?  @map("created_by_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  tracks         PlaylistTrack[]
+  scheduleBlocks ScheduleBlock[]
+  weatherRules   WeatherRule[]
+
+  @@index([organizationId])
+  @@map("playlists")
+}
+
+model PlaylistTrack {
+  id         String   @id @default(uuid())
+  playlistId String   @map("playlist_id")
+  trackId    String   @map("track_id")
+  position   Int      // Order in playlist
+  addedAt    DateTime @default(now()) @map("added_at")
+
+  // Relations
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  track    Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, trackId])
+  @@index([playlistId])
+  @@map("playlist_tracks")
+}
+
+// ============================================================================
+// SCHEDULING
+// ============================================================================
+
+model ScheduleBlock {
+  id         String   @id @default(uuid())
+  zoneId     String   @map("zone_id")
+  playlistId String   @map("playlist_id")
+  name       String?  // Optional override name
+  startTime  String   @map("start_time") // HH:mm format
+  endTime    String   @map("end_time")   // HH:mm format
+  rrule      String   // RFC 5545 recurrence rule
+  dtstart    DateTime // Anchor date for recurrence
+  until      DateTime? // End date (null = forever)
+  priority   Int      @default(50) // Higher wins conflicts (1-100)
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  zone     Zone     @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  @@index([zoneId])
+  @@index([playlistId])
+  @@map("schedule_blocks")
+}
+
+// ============================================================================
+// MESSAGING & ANNOUNCEMENTS
+// ============================================================================
+
+model Message {
+  id             String        @id @default(uuid())
+  name           String
+  description    String?
+  fileUrl        String        @map("file_url")
+  duration       Int           // Duration in seconds
+  priority       Int           @default(50) // Higher = more urgent
+  type           MessageType   @default(ANNOUNCEMENT)
+  organizationId String        @map("organization_id")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  organization      Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  messageSchedules  MessageSchedule[]
+
+  @@index([organizationId])
+  @@map("messages")
+}
+
+enum MessageType {
+  ANNOUNCEMENT
+  PROMOTION
+  EMERGENCY
+  CUSTOM
+}
+
+model MessageSchedule {
+  id              String    @id @default(uuid())
+  messageId       String    @map("message_id")
+  zoneIds         String[]  @map("zone_ids") // Target zones (empty = all)
+  playTime        String?   @map("play_time") // HH:mm for scheduled
+  intervalMinutes Int?      @map("interval_minutes") // For recurring
+  rrule           String?   // For complex recurrence
+  isActive        Boolean   @default(true) @map("is_active")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@map("message_schedules")
+}
+
+// ============================================================================
+// WEATHER AUTOMATION
+// ============================================================================
+
+model WeatherRule {
+  id         String          @id @default(uuid())
+  name       String
+  venueId    String          @map("venue_id")
+  playlistId String          @map("playlist_id")
+  conditions Json            // Weather conditions as JSON
+  priority   Int             @default(75) // Higher than manual schedules
+  isActive   Boolean         @default(true) @map("is_active")
+  createdAt  DateTime        @default(now()) @map("created_at")
+  updatedAt  DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  venue    Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  @@index([venueId])
+  @@map("weather_rules")
+}
+
+// ============================================================================
+// REAL-TIME STATE
+// ============================================================================
+
+model NowPlaying {
+  id           String   @id @default(uuid())
+  zoneId       String   @unique @map("zone_id")
+  trackId      String?  @map("track_id")
+  playlistId   String?  @map("playlist_id")
+  position     Int      @default(0) // Current position in seconds
+  isPlaying    Boolean  @default(false) @map("is_playing")
+  volume       Int      @default(70)
+  startedAt    DateTime @default(now()) @map("started_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  zone Zone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  @@map("now_playing")
+}
+
+// ============================================================================
+// AUDIT LOG
+// ============================================================================
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  userId         String?  @map("user_id")
+  action         String   // e.g., "playlist.created", "zone.volume_changed"
+  entityType     String?  @map("entity_type")
+  entityId       String?  @map("entity_id")
+  metadata       Json?    // Additional context
+  ipAddress      String?  @map("ip_address")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@index([organizationId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

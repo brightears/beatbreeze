@@ -1,0 +1,51 @@
+{
+	"name": "cloudcode",
+	"private": true,
+	"version": "0.1.0",
+	"description": "B2B music streaming platform for BMAsia",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"test": "vitest",
+		"test:run": "vitest run",
+		"test:coverage": "vitest run --coverage",
+		"lint": "prettier --check . && svelte-check",
+		"format": "prettier --write .",
+		"db:generate": "prisma generate",
+		"db:push": "prisma db push",
+		"db:migrate": "prisma migrate dev",
+		"db:studio": "prisma studio",
+		"db:seed": "tsx prisma/seed.ts"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-auto": "^7.0.0",
+		"@sveltejs/adapter-node": "^5.4.0",
+		"@sveltejs/kit": "^2.49.1",
+		"@sveltejs/vite-plugin-svelte": "^6.2.1",
+		"@testing-library/svelte": "^5.3.1",
+		"@types/howler": "^2.2.12",
+		"jsdom": "^27.0.1",
+		"prettier": "^3.3.0",
+		"prettier-plugin-svelte": "^3.2.0",
+		"prisma": "^6.19.1",
+		"svelte": "^5.45.6",
+		"svelte-check": "^4.3.4",
+		"tsx": "^4.19.0",
+		"typescript": "^5.9.3",
+		"vite": "^7.2.6",
+		"vitest": "^3.2.4"
+	},
+	"dependencies": {
+		"@prisma/client": "^6.19.1",
+		"@supabase/supabase-js": "^2.89.0",
+		"date-fns": "^4.1.0",
+		"dotenv": "^17.2.3",
+		"howler": "^2.2.4",
+		"rrule": "^2.8.1"
+	}
+}

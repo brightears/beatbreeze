@@ -1,0 +1,58 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(npm test:*)",
+      "Bash(npm install:*)",
+      "Bash(npx:*)",
+      "Bash(git:*)",
+      "Bash(node:*)",
+      "Bash(pnpm:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Edit(src/**)",
+      "Edit(static/**)",
+      "Edit(prisma/**)",
+      "Edit(tests/**)",
+      "Edit(.claude/**)",
+      "Write(src/**)",
+      "Write(static/**)",
+      "Write(prisma/**)",
+      "Write(tests/**)",
+      "Write(.claude/**)",
+      "Read",
+      "Glob",
+      "Grep",
+      "WebFetch",
+      "WebSearch"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(./secrets/**)",
+      "Bash(rm -rf:*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file_path=$(echo '$TOOL_INPUT' | jq -r '.file_path // empty'); if [ -n \"$file_path\" ] && [[ \"$file_path\" =~ \\.(ts|tsx|js|jsx|svelte)$ ]]; then npx prettier --write \"$file_path\" 2>/dev/null || true; fi"
+          }
+        ]
+      }
+    ]
+  },
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

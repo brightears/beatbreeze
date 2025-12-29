@@ -1,0 +1,14 @@
+# Ignore build outputs
+.svelte-kit/
+build/
+node_modules/
+
+# Ignore package files
+package-lock.json
+
+# Ignore generated files
+generated/
+*.generated.ts
+
+# Ignore env files
+.env*

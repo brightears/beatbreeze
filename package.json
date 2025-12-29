@@ -4,6 +4,9 @@
 	"version": "0.1.0",
 	"description": "B2B music streaming platform for BMAsia",
 	"type": "module",
+	"engines": {
+		"node": ">=20.19.0"
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",

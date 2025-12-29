@@ -12,11 +12,39 @@ Cloud Code is a web-first B2B music streaming platform designed to replace BeatB
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
 | Frontend | SvelteKit + Svelte 5 | UI framework with runes for state |
-| Database | Supabase (PostgreSQL) | Auth, RLS, real-time |
+| Database | Render PostgreSQL | Managed PostgreSQL with auto-backups |
+| Hosting | Render Web Service | Auto-deploy from GitHub |
 | Storage | Cloudflare R2 | Audio files (zero egress) |
 | Real-time | MQTT (EMQX) | Zone control and status |
 | Offline | OPFS | 3-4x faster than IndexedDB |
 | Native | Capacitor | iOS/Android apps |
+
+## Infrastructure (Render.com)
+
+### GitHub Repository
+- **URL**: https://github.com/brightears/beatbreeze
+- **Branch**: main
+- **Auto-deploy**: Enabled
+
+### PostgreSQL Database
+- **ID**: `dpg-d599alggjchc73aj87bg-a`
+- **Name**: cloudcode-db
+- **Region**: Singapore
+- **Plan**: basic_256mb
+- **Dashboard**: https://dashboard.render.com/d/dpg-d599alggjchc73aj87bg-a
+
+### Web Service
+- **ID**: `srv-d599fth5pdvs73a8qspg`
+- **Name**: cloudcode
+- **URL**: https://cloudcode-0dpi.onrender.com
+- **Region**: Singapore
+- **Plan**: starter
+- **Dashboard**: https://dashboard.render.com/web/srv-d599fth5pdvs73a8qspg
+
+### Render API
+- **Base URL**: `https://api.render.com/v1`
+- **Owner ID**: `tea-d13uhr3uibrs73btc1p0`
+- API key stored in `.env` as `RENDER_API_KEY`
 
 ## Project Structure
 
@@ -104,24 +132,35 @@ npm run db:studio        # Open Prisma Studio
 ## Environment Variables
 
 ```bash
-# Supabase
-PUBLIC_SUPABASE_URL=
-PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
+# Render API (for infrastructure management)
+RENDER_API_KEY=
 
-# Cloudflare R2
+# Database (Render PostgreSQL)
+DATABASE_URL=              # External connection string
+DATABASE_URL_INTERNAL=     # Internal (use on Render services)
+
+# Cloudflare R2 (audio storage)
 R2_ACCOUNT_ID=
 R2_ACCESS_KEY_ID=
 R2_SECRET_ACCESS_KEY=
-R2_BUCKET_NAME=
+R2_BUCKET_NAME=cloudcode-audio
+R2_PUBLIC_URL=
 
-# MQTT
+# MQTT (real-time zone control)
 MQTT_BROKER_URL=
 MQTT_USERNAME=
 MQTT_PASSWORD=
 
-# Weather
-OPENWEATHER_API_KEY=  # Optional, Open-Meteo is free
+# App Configuration
+NODE_ENV=development
+ORIGIN=https://cloudcode-0dpi.onrender.com
+
+# Optional: Supabase Auth (if using Supabase Auth instead of custom)
+PUBLIC_SUPABASE_URL=
+PUBLIC_SUPABASE_ANON_KEY=
+
+# Optional: AI Features
+OPENAI_API_KEY=
 ```
 
 ## MVP Timeline (10-12 Weeks)

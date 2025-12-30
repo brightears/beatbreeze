@@ -14,6 +14,7 @@ declare global {
  * In development, we store the client in a global variable
  * to prevent creating new connections on hot reload
  */
+// Export as both 'prisma' and 'db' for flexibility
 export const prisma: PrismaClient =
   globalThis.__prisma ??
   new PrismaClient({
@@ -23,6 +24,9 @@ export const prisma: PrismaClient =
 if (dev) {
   globalThis.__prisma = prisma;
 }
+
+// Alias for cleaner imports
+export const db = prisma;
 
 /**
  * Graceful shutdown

@@ -1,15 +1,25 @@
 # Cloud Code - Persistent Memory
 
-**Last Updated**: 2025-12-29
+**Last Updated**: 2025-12-30
 
-## Project Status: Phase 1 Complete - Infrastructure Ready
+## Project Status: Phase 2 In Progress - Content Management System
 
 ### What's Been Built
+
+**Phase 1: Infrastructure**
 - SvelteKit + Svelte 5 + TypeScript project
 - Prisma schema with 12 tables (multi-tenant architecture)
 - Docker-based deployment on Render
 - PostgreSQL database on Render (Singapore region)
 - Claude Code infrastructure (5 agents, 5 commands, 7 skills, 4 rules)
+
+**Phase 2: Content Management System (In Progress)**
+- Cloudflare R2 storage integration (`src/lib/server/storage/r2.ts`)
+- Track upload API with presigned URLs (`/api/upload`, `/api/tracks`)
+- Drag-drop track uploader component (`TrackUploader.svelte`)
+- Track library page with search/filter (`/tracks`)
+- Track metadata editor (`/tracks/[id]`)
+- Base UI components (Button.svelte)
 
 ### Live Infrastructure
 
@@ -19,6 +29,14 @@
 | PostgreSQL | dpg-d599alggjchc73aj87bg-a | Internal: `dpg-d599alggjchc73aj87bg-a/cloudcode` |
 | Web Service | srv-d59a1keuk2gs73e36a9g | https://cloudcode-4g2d.onrender.com |
 | Render Owner | tea-d13uhr3uibrs73btc1p0 | API access via RENDER_API_KEY |
+| Cloudflare R2 | e44a38bf6f4797364e4f4a91b94277fd | Bucket: `cloudcode-audio` |
+
+### Cloudflare R2 Credentials
+- **Account ID**: e44a38bf6f4797364e4f4a91b94277fd
+- **Access Key ID**: e569d3da50532b29e3928977cf9a49d4
+- **Secret Access Key**: (stored in .env as R2_SECRET_ACCESS_KEY)
+- **S3 Endpoint**: https://e44a38bf6f4797364e4f4a91b94277fd.r2.cloudflarestorage.com
+- **Bucket Name**: cloudcode-audio (created, APAC region)
 
 ### Database Credentials
 - **User**: cloudcode_user
@@ -50,7 +68,7 @@
 - **Offline**: OPFS (3-4x faster than IndexedDB)
 - **Scheduling**: rrule.js (RFC 5545)
 - **Real-time**: MQTT (to be configured)
-- **Storage**: Cloudflare R2 (to be configured)
+- **Storage**: Cloudflare R2 (configured, bucket pending)
 
 ### Critical Technical Constraints
 1. iOS PWA: No background audio → Need Capacitor for native
@@ -58,19 +76,31 @@
 3. No Spotify/YouTube: ToS prohibits → Royalty-free only
 4. Service Workers: Can't play audio → Only cache assets
 
-### Next Development Phase: Content Management System
-According to the plan, Week 3-4 should focus on:
-1. Track upload interface (drag-drop, batch)
-2. Metadata editor (title, artist, genre, mood, BPM)
-3. Playlist CRUD (create, edit, reorder)
-4. Content library browser with search/filter
-5. R2 upload integration
+### Next Development Phase: Playlist System
+Remaining CMS tasks:
+1. Playlist CRUD (create, edit, reorder tracks)
+2. Playlist browser with search/filter
+3. Drag-drop playlist editor
+4. Then move to Phase 3: Scheduling System
 
 ### Key Files to Know
-- `prisma/schema.prisma` - Database schema
+
+**Infrastructure**
+- `prisma/schema.prisma` - Database schema (14 models)
 - `src/lib/types/index.ts` - TypeScript definitions
 - `src/lib/server/db/prisma.ts` - Prisma client singleton
 - `Dockerfile` - Production build configuration
+
+**Content Management**
+- `src/lib/server/storage/r2.ts` - R2 upload/download service
+- `src/routes/api/tracks/+server.ts` - Track list/create API
+- `src/routes/api/tracks/[id]/+server.ts` - Track CRUD API
+- `src/routes/api/upload/+server.ts` - Presigned URL generation
+- `src/lib/components/ui/TrackUploader.svelte` - Upload component
+- `src/routes/(app)/tracks/+page.svelte` - Track library page
+- `src/routes/(app)/tracks/[id]/+page.svelte` - Track editor
+
+**Claude Code**
 - `.claude/skills/` - 7 context-aware skills
 - `.claude/agents/` - 5 specialized agents
 

@@ -34,9 +34,10 @@
 ### Cloudflare R2 Credentials
 - **Account ID**: e44a38bf6f4797364e4f4a91b94277fd
 - **Access Key ID**: e569d3da50532b29e3928977cf9a49d4
-- **Secret Access Key**: (stored in .env as R2_SECRET_ACCESS_KEY)
+- **Secret Access Key**: (stored in .env and Render env vars)
 - **S3 Endpoint**: https://e44a38bf6f4797364e4f4a91b94277fd.r2.cloudflarestorage.com
-- **Bucket Name**: cloudcode-audio (created, APAC region)
+- **Bucket Name**: cloudcode-audio (APAC region)
+- **Render Env Vars**: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, R2_ENDPOINT
 
 ### Database Credentials
 - **User**: cloudcode_user
@@ -68,7 +69,7 @@
 - **Offline**: OPFS (3-4x faster than IndexedDB)
 - **Scheduling**: rrule.js (RFC 5545)
 - **Real-time**: MQTT (to be configured)
-- **Storage**: Cloudflare R2 (configured, bucket pending)
+- **Storage**: Cloudflare R2 (fully configured on Render)
 
 ### Critical Technical Constraints
 1. iOS PWA: No background audio → Need Capacitor for native

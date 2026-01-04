@@ -142,3 +142,49 @@ Use these agents for complex tasks:
 - "OPFS", "offline" → opfs-caching skill
 - "RRULE", "recurring" → rrule-scheduling skill
 - "runes", "$state", "$derived" → svelte5-runes skill
+
+---
+
+## Workflow Optimizations (Boris Cherny Style)
+
+### PostToolUse Hook
+Auto-formats code after Write/Edit operations using Prettier.
+- Config: `.claude/settings.json` → hooks.PostToolUse
+- Prevents formatting errors in CI
+
+### Pre-Allowed Permissions
+Common safe commands pre-allowed to avoid prompts:
+- `npm run:*`, `npm test:*`, `npm install:*`
+- `git:*`, `node:*`, `pnpm:*`
+- Edit/Write for src/**, static/**, prisma/**, tests/**
+
+### Verification Loop (CRITICAL)
+Always verify work - 2-3x quality improvement:
+1. After UI changes → Test in browser via Claude in Chrome MCP
+2. After API changes → Test endpoint with curl
+3. After any change → Run `npm run check`
+
+### Development Workflow Commands
+```sh
+# 1. Make changes (Claude does this)
+
+# 2. Typecheck (fast)
+npm run check
+
+# 3. Run tests
+npm run test
+
+# 4. Lint before committing
+npm run lint
+
+# 5. Before creating PR
+npm run lint && npm run check && npm run test
+```
+
+### Things Claude Should NOT Do
+- Don't use Svelte stores (use Svelte 5 runes: $state, $derived, $effect)
+- Don't use `any` type (use `unknown` with type guards)
+- Don't create files unless necessary (prefer editing existing)
+- Don't add emojis unless user requests
+- Don't run local dev server (we deploy to Render)
+- Don't use `durationSeconds` (field is `duration` in Prisma schema)

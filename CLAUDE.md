@@ -189,3 +189,32 @@ This project includes specialized Claude Code agents:
 - `/test [file]` - Generate tests for a file
 - `/db-table [name]` - Add new database table
 - `/audio-feature [name]` - Add audio engine feature
+
+## Development Workflow
+
+### After Making Changes
+```bash
+npm run check        # Always run after changes
+npm run build        # Verify production build
+git add . && git commit && git push  # Deploy to Render
+```
+
+### Verification Loop (CRITICAL)
+Always verify work for 2-3x quality improvement:
+1. After UI changes → Test at https://cloudcode-4g2d.onrender.com
+2. After API changes → Test with curl or browser
+3. After any change → Run `npm run check`
+
+### PostToolUse Hook
+Code is auto-formatted with Prettier after Write/Edit operations.
+Config: `.claude/settings.json`
+
+## Things NOT To Do
+
+- **Don't use Svelte stores** → Use Svelte 5 runes ($state, $derived, $effect)
+- **Don't use `any` type** → Use `unknown` with type guards
+- **Don't use `durationSeconds`** → Field is `duration` in Prisma schema
+- **Don't create unnecessary files** → Prefer editing existing files
+- **Don't add emojis** → Unless user requests
+- **Don't run local dev** → We deploy everything to Render
+- **Don't guess organization IDs** → Use 'demo-org-id' for testing

@@ -14,6 +14,7 @@
       "Bash(head:*)",
       "Bash(tail:*)",
       "Bash(wc:*)",
+      "Bash(curl:*)",
       "Edit(src/**)",
       "Edit(static/**)",
       "Edit(prisma/**)",
@@ -35,7 +36,6 @@
       "Read(.env.*)",
       "Read(./secrets/**)",
       "Bash(rm -rf:*)",
-      "Bash(curl:*)",
       "Bash(wget:*)"
     ]
   },
